@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html data-theme="dark">
+<head>
+  <title>Hospital AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg-primary: #0f0f0f;
+      --bg-secondary: #171717;
+      --bg-tertiary: #1e1e1e;
+      --bg-hover: #252525;
+      --bg-active: #2a2a2a;
+      --bg-input: #1e1e1e;
+      --border: #2e2e2e;
+      --border-hover: #3a3a3a;
+      --text-primary: #f0f0f0;
+      --text-secondary: #a0a0a0;
+      --text-muted: #5e5e5e;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --accent-muted: rgba(59,130,246,0.12);
+      --send-bg: #f0f0f0;
+      --send-color: #111;
+      --send-hover: #d8d8d8;
+      --green: #34d399;
+      --green-bg: #052e16;
+      --yellow: #fbbf24;
+      --yellow-bg: #451a03;
+      --red: #f87171;
+      --red-bg: #450a0a;
+      --shadow: 0 2px 8px rgba(0,0,0,0.4);
+      --radius: 10px;
+      --radius-lg: 14px;
+      --transition: 0.18s ease;
+      --sidebar-w: 256px;
+    }
+    [data-theme="light"] {
+      --bg-primary: #f4f5f7;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f0f1f3;
+      --bg-hover: #eaebed;
+      --bg-active: #e2e4e7;
+      --bg-input: #ffffff;
+      --border: #dde0e4;
+      --border-hover: #c4c8ce;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-muted: rgba(37,99,235,0.08);
+      --send-bg: #111827;
+      --send-color: #fff;
+      --send-hover: #374151;
+      --green: #059669;
+      --green-bg: #d1fae5;
+      --yellow: #d97706;
+      --yellow-bg: #fef3c7;
+      --red: #dc2626;
+      --red-bg: #fee2e2;
+      --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg-primary); color: var(--text-primary); display: flex; height: 100vh; overflow: hidden; transition: background var(--transition), color var(--transition); }
+
+    .sidebar { width: var(--sidebar-w); background: var(--bg-secondary); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 10px 8px; flex-shrink: 0; transition: background var(--transition), border-color var(--transition); }
+    .sidebar-top { display: flex; justify-content: space-between; align-items: center; padding: 6px 8px 14px; }
+    .logo { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 15px; color: var(--text-primary); }
+    .logo-icon { width: 28px; height: 28px; background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+    .sidebar-icon-btn { background: none; border: none; cursor: pointer; padding: 6px; border-radius: 8px; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; transition: background var(--transition), color var(--transition); }
+    .sidebar-icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .sidebar-nav { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 13.5px; color: var(--text-secondary); user-select: none; transition: background var(--transition), color var(--transition); }
+    .nav-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .nav-item.active { background: var(--bg-active); color: var(--text-primary); font-weight: 500; }
+    .nav-item svg { flex-shrink: 0; opacity: 0.75; }
+    .nav-item.active svg { opacity: 1; }
+    .sidebar-section-label { font-size: 11px; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; padding: 10px 10px 5px; font-weight: 600; }
+    .recents { flex: 1; overflow-y: auto; }
+    .recent-item { padding: 6px 10px; font-size: 12.5px; color: var(--text-secondary); border-radius: 7px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: 7px; transition: background var(--transition), color var(--transition); }
+    .recent-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-hover); border-radius: 4px; }
+    .sidebar-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
+    .user-row { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background var(--transition); }
+    .user-row:hover { background: var(--bg-hover); }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg, #3b82f6, #06b6d4); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: white; flex-shrink: 0; }
+    .user-info .name { font-size: 13.5px; color: var(--text-primary); font-weight: 500; }
+    .user-info .sub  { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; }
+
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg-primary); transition: background var(--transition); }
+    .topbar { height: 52px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); background: var(--bg-secondary); flex-shrink: 0; transition: background var(--transition), border-color var(--transition); }
+    .topbar-title { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+    .topbar-badge { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--accent-muted); color: var(--accent); font-weight: 500; margin-left: 10px; }
+    .topbar-right { display: flex; align-items: center; gap: 8px; }
+    .theme-toggle { display: flex; align-items: center; gap: 6px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 20px; padding: 3px 4px; cursor: pointer; transition: background var(--transition), border-color var(--transition); }
+    .theme-btn { width: 28px; height: 26px; border: none; cursor: pointer; border-radius: 16px; display: flex; align-items: center; justify-content: center; background: transparent; color: var(--text-muted); transition: background var(--transition), color var(--transition); font-size: 13px; }
+    .theme-btn.active { background: var(--bg-secondary); color: var(--text-primary); box-shadow: var(--shadow); }
+
+    .chat-area { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+    .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding-bottom: 60px; }
+    .empty-icon { width: 52px; height: 52px; border-radius: 16px; background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%); display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 4px; }
+    .empty-state h1 { font-size: 24px; font-weight: 500; color: var(--text-primary); }
+    .empty-state p { font-size: 14px; color: var(--text-secondary); }
+    .empty-chips { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 8px; }
+    .empty-chip { padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-secondary); font-size: 13px; color: var(--text-secondary); cursor: pointer; transition: all var(--transition); }
+    .empty-chip:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-muted); }
+
+    .messages { padding: 28px 24px 8px; display: flex; flex-direction: column; gap: 24px; max-width: 740px; width: 100%; margin: 0 auto; }
+    .message-user { font-size: 14.5px; color: var(--text-primary); font-weight: 500; background: var(--bg-tertiary); border-radius: var(--radius-lg); padding: 12px 16px; align-self: flex-end; max-width: 80%; border: 1px solid var(--border); }
+    .message-bot { font-size: 14px; color: var(--text-primary); line-height: 1.75; }
+    .bot-label { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 12px; }
+    .bot-label-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+
+    /* Memory badge — shown when Hindsight recall fired */
+    .memory-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--accent); background: var(--accent-muted); border: 1px solid rgba(59,130,246,0.2); border-radius: 20px; padding: 3px 10px; margin-bottom: 10px; font-weight: 500; }
+
+    /* Restock alert badge */
+    .restock-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--yellow); background: var(--yellow-bg); border-radius: 20px; padding: 3px 10px; margin-bottom: 10px; font-weight: 500; margin-left: 6px; }
+
+    .result-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; margin-bottom: 10px; transition: background var(--transition), border-color var(--transition); }
+    .result-top { font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 10px; }
+    .result-body { font-family: 'SF Mono','Cascadia Code','Fira Code',monospace; font-size: 13px; color: var(--text-secondary); white-space: pre-wrap; word-break: break-word; line-height: 1.7; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 600; }
+    .badge-ok   { color: var(--green); }
+    .badge-warn { color: var(--yellow); }
+    .badge-err  { color: var(--red); }
+    .notes-card { background: var(--bg-tertiary); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; border: 1px solid var(--border); }
+    .notes-title { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; }
+    .notes-card ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    .notes-card li { font-size: 13.5px; color: var(--text-secondary); line-height: 1.6; padding-left: 14px; position: relative; }
+    .notes-card li::before { content: '•'; position: absolute; left: 0; color: var(--accent); }
+    .hint-text { font-size: 12.5px; color: var(--text-muted); margin-top: 6px; }
+    .hint-text strong { color: var(--accent); }
+    .msg-actions { display: flex; gap: 2px; margin-top: 8px; }
+    .action-btn { background: none; border: none; cursor: pointer; padding: 5px; border-radius: 6px; color: var(--text-muted); display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
+    .action-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+
+    .panel { max-width: 740px; width: 100%; margin: 0 auto; padding: 28px 24px 8px; }
+    .panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+    .panel-title { font-size: 18px; font-weight: 500; color: var(--text-primary); }
+
+    .med-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; transition: background var(--transition), border-color var(--transition); }
+    .med-card:hover { background: var(--bg-hover); }
+    .med-name { font-size: 14.5px; font-weight: 500; color: var(--text-primary); }
+    .med-meta { font-size: 12px; color: var(--text-muted); margin-top: 3px; display: flex; gap: 10px; }
+    .med-badge { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; white-space: nowrap; }
+    .stock-ok   { background: var(--green-bg); color: var(--green); }
+    .stock-low  { background: var(--yellow-bg); color: var(--yellow); }
+    .stock-zero { background: var(--red-bg); color: var(--red); }
+    .section-tag { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; padding: 16px 0 8px; display: block; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
+    .stat-card { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; transition: background var(--transition), border-color var(--transition); }
+    .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+    .stat-value { font-size: 26px; font-weight: 500; color: var(--text-primary); }
+    .stat-value.green { color: var(--green); }
+    .stat-value.yellow { color: var(--yellow); }
+    .stat-value.red { color: var(--red); }
+    .stat-value.blue { color: var(--accent); }
+
+    /* Memory panel styles */
+    .memory-entry { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; border-left: 3px solid var(--accent); }
+    .memory-query { font-size: 13.5px; color: var(--text-primary); font-weight: 500; }
+    .memory-time { font-size: 11.5px; color: var(--text-muted); margin-top: 3px; }
+    .memory-count { font-size: 11px; background: var(--accent-muted); color: var(--accent); padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+
+    /* Restock prediction panel */
+    .restock-card { background: var(--yellow-bg); border: 1px solid rgba(251,191,36,0.3); border-radius: var(--radius-lg); padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+    .restock-info .med-name { color: var(--yellow); }
+    .restock-detail { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+    .restock-badge-count { font-size: 12px; font-weight: 600; color: var(--yellow); background: rgba(251,191,36,0.15); border: 1px solid rgba(251,191,36,0.3); padding: 4px 12px; border-radius: 20px; white-space: nowrap; }
+
+    .history-item { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; transition: background var(--transition); }
+    .history-item:hover { background: var(--bg-hover); }
+    .h-query { font-size: 14px; color: var(--text-primary); }
+    .h-time { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .btn-repeat { font-size: 12px; color: var(--accent); cursor: pointer; background: var(--accent-muted); border: none; padding: 5px 12px; border-radius: 6px; white-space: nowrap; transition: all var(--transition); }
+    .btn-repeat:hover { background: var(--accent); color: white; }
+
+    .input-wrapper { padding: 10px 20px 18px; max-width: 740px; width: 100%; margin: 0 auto; }
+    .input-box { background: var(--bg-input); border-radius: 16px; border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; box-shadow: var(--shadow); transition: border-color var(--transition), background var(--transition), box-shadow var(--transition); }
+    .input-box:focus-within { border-color: var(--border-hover); box-shadow: 0 0 0 3px var(--accent-muted); }
+    .input-row { display: flex; align-items: flex-end; padding: 12px 14px 0; gap: 8px; }
+    .input-row textarea { flex: 1; background: none; border: none; outline: none; color: var(--text-primary); font-size: 14.5px; font-family: inherit; resize: none; max-height: 160px; line-height: 1.55; padding: 0; }
+    .input-row textarea::placeholder { color: var(--text-muted); }
+    .input-actions { display: flex; align-items: center; justify-content: space-between; padding: 8px 14px 12px; }
+    .input-left { display: flex; gap: 4px; }
+    .icon-btn { width: 32px; height: 32px; background: none; border: none; cursor: pointer; border-radius: 8px; color: var(--text-muted); display: flex; align-items: center; justify-content: center; transition: all var(--transition); }
+    .icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .icon-btn.listening { color: var(--red) !important; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .send-btn { width: 32px; height: 32px; background: var(--send-bg); border: none; border-radius: 50%; cursor: pointer; color: var(--send-color); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--transition); }
+    .send-btn:hover { background: var(--send-hover); transform: scale(1.05); }
+    .send-btn:disabled { background: var(--bg-active); color: var(--text-muted); cursor: not-allowed; transform: none; }
+
+    .typing-dots { display: flex; gap: 5px; padding: 8px 0; }
+    .typing-dots span { width: 7px; height: 7px; background: var(--text-muted); border-radius: 50%; animation: bounce 1.2s infinite; }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,80%,100% { transform: translateY(0); } 40% { transform: translateY(-5px); } }
+
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); display: inline-block; margin-right: 6px; }
+    .alert-bar { background: var(--yellow-bg); border-bottom: 1px solid rgba(251,191,36,0.2); padding: 8px 20px; font-size: 12.5px; color: var(--yellow); display: flex; align-items: center; gap: 8px; }
+    [data-theme="light"] .alert-bar { background: #fef3c7; border-color: #fcd34d; }
+
+    .profile-tab { background: none; border: none; cursor: pointer; font-size: 13.5px; color: var(--text-muted); padding: 11px 14px; border-bottom: 2px solid transparent; margin-bottom: -1px; font-family: inherit; font-weight: 500; transition: color var(--transition), border-color var(--transition); }
+    .profile-tab:hover { color: var(--text-primary); }
+    .profile-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .profile-row { display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; background: var(--bg-tertiary); border-radius: 8px; }
+    .profile-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .profile-value { font-size: 13.5px; color: var(--text-primary); text-align: right; }
+    .form-label { font-size: 12px; color: var(--text-muted); font-weight: 500; display: block; margin-bottom: 5px; }
+    .form-input { width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-size: 13.5px; color: var(--text-primary); outline: none; font-family: inherit; transition: border-color var(--transition), background var(--transition); }
+    .form-input:focus { border-color: var(--accent); }
+
+    .inv-filter { font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-tertiary); color: var(--text-secondary); cursor: pointer; font-family: inherit; transition: all var(--transition); }
+    .inv-filter:hover { border-color: var(--accent); color: var(--accent); }
+    .active-filter { background: var(--accent-muted); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+    .search-input { width: 100%; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13.5px; color: var(--text-primary); outline: none; font-family: inherit; margin-bottom: 14px; transition: border-color var(--transition), background var(--transition); }
+    .search-input::placeholder { color: var(--text-muted); }
+    .search-input:focus { border-color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-top">
+    <div class="logo">
+      <div class="logo-icon">💊</div>
+      Hospital AI
+    </div>
+    <button class="sidebar-icon-btn" title="New chat" onclick="newChat()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+    </button>
+  </div>
+
+  <div class="sidebar-nav">
+    <div class="nav-item active" id="nav-search" onclick="showSearch()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      Search medicines
+    </div>
+    <div class="nav-item" id="nav-inventory" onclick="showInventory()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Inventory
+    </div>
+    <div class="nav-item" id="nav-dashboard" onclick="showDashboard()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="6" height="8" rx="1"/><rect x="9" y="3" width="13" height="4" rx="1"/><rect x="9" y="10" width="13" height="5" rx="1"/><rect x="2" y="14" width="6" height="7" rx="1"/><rect x="9" y="18" width="13" height="3" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" id="nav-memory" onclick="showMemory()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a5 5 0 0 1 5 5c0 2.5-1.5 4.5-3.5 5.3V14h2l-3.5 4-3.5-4h2v-1.7C8.5 11.5 7 9.5 7 7a5 5 0 0 1 5-5z"/><path d="M8 22h8"/><path d="M12 18v4"/></svg>
+      Memory & Insights
+    </div>
+    <div class="nav-item" id="nav-history" onclick="showHistory()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+      History
+    </div>
+  </div>
+
+  <div class="sidebar-section-label">Recents</div>
+  <div class="recents" id="recents">
+    <div id="noRecents" style="color:var(--text-muted);font-style:italic;font-size:12px;padding:4px 10px;">No searches yet</div>
+  </div>
+
+  <hr class="sidebar-divider">
+
+  <div class="user-row" onclick="showProfile()" title="View profile">
+    <div class="avatar" id="sidebarAvatar">DV</div>
+    <div class="user-info" style="flex:1;min-width:0;">
+      <div class="name" id="sidebarName">Dinesh Varma</div>
+      <div class="sub"><span class="status-dot"></span><span id="sidebarRole">Pharmacy Staff</span></div>
+    </div>
+    <div style="color:var(--text-muted);flex-shrink:0;">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div id="profileOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(2px);" onclick="closeProfileIfOutside(event)">
+  <div id="profileModal" style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:20px;width:440px;max-width:94vw;box-shadow:0 24px 60px rgba(0,0,0,0.4);overflow:hidden;">
+    <div style="background:linear-gradient(135deg,#1e3a5f 0%,#0f1f3d 100%);padding:28px 24px 20px;position:relative;">
+      <button onclick="closeProfile()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.12);border:none;cursor:pointer;width:28px;height:28px;border-radius:50%;color:white;display:flex;align-items:center;justify-content:center;font-size:16px;">×</button>
+      <div style="display:flex;align-items:flex-end;gap:16px;">
+        <div id="profileAvatarLarge" style="width:68px;height:68px;border-radius:50%;background:linear-gradient(135deg,#3b82f6,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:600;color:white;border:3px solid rgba(255,255,255,0.2);">DV</div>
+        <div>
+          <div id="profileDisplayName" style="font-size:20px;font-weight:600;color:white;">Dinesh Varma</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+            <span id="profileRoleBadge" style="font-size:12px;background:rgba(59,130,246,0.3);color:#93c5fd;padding:3px 10px;border-radius:20px;font-weight:500;">Pharmacy Staff</span>
+            <span style="font-size:12px;color:rgba(255,255,255,0.5);">· City General Hospital</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);border-bottom:1px solid var(--border);">
+      <div style="padding:14px 0;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:20px;font-weight:600;color:var(--accent);" id="statSearches">0</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Searches</div>
+      </div>
+      <div style="padding:14px 0;text-align:center;border-right:1px solid var(--border);">
+        <div style="font-size:20px;font-weight:600;color:var(--green);">28</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Medicines</div>
+      </div>
+      <div style="padding:14px 0;text-align:center;">
+        <div style="font-size:20px;font-weight:600;color:var(--text-primary);">2y</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Experience</div>
+      </div>
+    </div>
+    <div style="display:flex;border-bottom:1px solid var(--border);padding:0 20px;">
+      <button class="profile-tab active" id="tab-info" onclick="switchTab('info')">Info</button>
+      <button class="profile-tab" id="tab-edit" onclick="switchTab('edit')">Edit Profile</button>
+      <button class="profile-tab" id="tab-security" onclick="switchTab('security')">Security</button>
+    </div>
+    <div id="tabInfo" style="padding:20px 24px;">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="profile-row"><div class="profile-label">Full name</div><div class="profile-value" id="infoName">Dinesh Varma</div></div>
+        <div class="profile-row"><div class="profile-label">Employee ID</div><div class="profile-value">#PH-2041</div></div>
+        <div class="profile-row"><div class="profile-label">Role</div><div class="profile-value" id="infoRole">Pharmacy Staff</div></div>
+        <div class="profile-row"><div class="profile-label">Department</div><div class="profile-value">Pharmacy · Floor 2</div></div>
+        <div class="profile-row"><div class="profile-label">Email</div><div class="profile-value" id="infoEmail">dinesh.varma@cityhospital.in</div></div>
+        <div class="profile-row"><div class="profile-label">Shift</div><div class="profile-value">Morning · 08:00 – 16:00</div></div>
+      </div>
+    </div>
+    <div id="tabEdit" style="display:none;padding:20px 24px;">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div><label class="form-label">Full name</label><input class="form-input" id="editName" value="Dinesh Varma"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><label class="form-label">Role</label><select class="form-input" id="editRole"><option>Pharmacy Staff</option><option>Senior Pharmacist</option><option>Head Pharmacist</option><option>Intern</option></select></div>
+          <div><label class="form-label">Shift</label><select class="form-input"><option>Morning · 08:00–16:00</option><option>Afternoon · 14:00–22:00</option><option>Night · 22:00–06:00</option></select></div>
+        </div>
+        <div><label class="form-label">Email</label><input class="form-input" id="editEmail" value="dinesh.varma@cityhospital.in"></div>
+        <button onclick="saveProfile()" style="margin-top:4px;background:var(--accent);color:white;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;width:100%;">Save changes</button>
+      </div>
+    </div>
+    <div id="tabSecurity" style="display:none;padding:20px 24px;">
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div><label class="form-label">Current password</label><input class="form-input" type="password" placeholder="Enter current password"></div>
+        <div><label class="form-label">New password</label><input class="form-input" type="password" placeholder="New password"></div>
+        <button style="background:var(--accent);color:white;border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;width:100%;">Update password</button>
+        <button onclick="closeProfile()" style="background:var(--red-bg);color:var(--red);border:none;border-radius:8px;padding:10px;font-size:14px;font-weight:500;cursor:pointer;width:100%;">Sign out</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;">
+      <span class="topbar-title" id="topbarTitle">Search medicines</span>
+      <span class="topbar-badge" id="topbarBadge">AI Powered</span>
+    </div>
+    <div class="topbar-right">
+      <div class="theme-toggle" onclick="toggleTheme()">
+        <button class="theme-btn active" id="btn-dark" title="Dark mode">🌙</button>
+        <button class="theme-btn" id="btn-light" title="Light mode">☀️</button>
+      </div>
+      <button class="sidebar-icon-btn" title="Settings" style="margin-left:4px;" onclick="showSettings()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="alert-bar" id="alertBar" style="display:none;">
+    ⚠️ <strong>Insulin</strong> stock is critically low (5 units). Consider restocking.
+  </div>
+
+  <div class="chat-area" id="chatArea">
+
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">💊</div>
+      <h1>What are you working on?</h1>
+      <p>Search medicines, check inventory, or view memory insights.</p>
+      <div class="empty-chips">
+        <div class="empty-chip" onclick="quickSearch('paracetamol')">Paracetamol</div>
+        <div class="empty-chip" onclick="quickSearch('insulin')">Insulin</div>
+        <div class="empty-chip" onclick="quickSearch('dolo 650')">Dolo 650</div>
+        <div class="empty-chip" onclick="quickSearch('amoxicillin')">Amoxicillin</div>
+      </div>
+    </div>
+
+    <!-- Messages -->
+    <div class="messages" id="messages" style="display:none;"></div>
+
+    <!-- Inventory panel -->
+    <div class="panel" id="inventoryPanel" style="display:none;">
+      <div class="panel-header">
+        <div class="panel-title">Inventory</div>
+        <div style="font-size:12px;color:var(--text-muted);">Last updated: just now</div>
+      </div>
+      <input class="search-input" placeholder="Filter medicines by name..." oninput="filterInventory(this.value)">
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <button class="inv-filter active-filter" onclick="filterByStatus('all',this)">All (28)</button>
+        <button class="inv-filter" onclick="filterByStatus('ok',this)">In Stock (18)</button>
+        <button class="inv-filter" onclick="filterByStatus('low',this)">Low Stock (6)</button>
+        <button class="inv-filter" onclick="filterByStatus('zero',this)">Out of Stock (4)</button>
+      </div>
+      <div id="invList">
+        <span class="section-tag">Analgesics & Antipyretics</span>
+        <div class="med-card" data-name="paracetamol 500mg" data-status="ok"><div><div class="med-name">Paracetamol 500mg</div><div class="med-meta"><span>📍 Block A · Shelf 3</span><span>Batch #PA2024 · Exp: Mar 2026</span></div></div><div class="med-badge stock-ok">120 units</div></div>
+        <div class="med-card" data-name="dolo 650" data-status="zero"><div><div class="med-name">Dolo 650</div><div class="med-meta"><span>📍 Block C · Shelf 1</span><span>Batch #DL2024 · Exp: Dec 2025</span></div></div><div class="med-badge stock-zero">Out of Stock</div></div>
+        <div class="med-card" data-name="ibuprofen 400mg" data-status="ok"><div><div class="med-name">Ibuprofen 400mg</div><div class="med-meta"><span>📍 Block A · Shelf 4</span><span>Batch #IB2024 · Exp: Aug 2026</span></div></div><div class="med-badge stock-ok">85 units</div></div>
+        <div class="med-card" data-name="aspirin 75mg" data-status="low"><div><div class="med-name">Aspirin 75mg</div><div class="med-meta"><span>📍 Block A · Shelf 5</span><span>Batch #AS2024 · Exp: Oct 2025</span></div></div><div class="med-badge stock-low">8 units · Low</div></div>
+        <div class="med-card" data-name="diclofenac 50mg" data-status="ok"><div><div class="med-name">Diclofenac 50mg</div><div class="med-meta"><span>📍 Block A · Shelf 6</span><span>Batch #DC2024 · Exp: Jan 2027</span></div></div><div class="med-badge stock-ok">54 units</div></div>
+        <span class="section-tag" style="display:block;padding-top:10px;">Antibiotics</span>
+        <div class="med-card" data-name="amoxicillin 250mg" data-status="ok"><div><div class="med-name">Amoxicillin 250mg</div><div class="med-meta"><span>📍 Block A · Shelf 7</span><span>Batch #AM2024 · Exp: Apr 2026</span></div></div><div class="med-badge stock-ok">68 units</div></div>
+        <div class="med-card" data-name="azithromycin 500mg" data-status="low"><div><div class="med-name">Azithromycin 500mg</div><div class="med-meta"><span>📍 Block B · Shelf 1</span><span>Batch #AZ2024 · Exp: Jun 2026</span></div></div><div class="med-badge stock-low">9 units · Low</div></div>
+        <div class="med-card" data-name="ciprofloxacin 500mg" data-status="ok"><div><div class="med-name">Ciprofloxacin 500mg</div><div class="med-meta"><span>📍 Block B · Shelf 2</span><span>Batch #CF2024 · Exp: Sep 2026</span></div></div><div class="med-badge stock-ok">42 units</div></div>
+        <div class="med-card" data-name="metronidazole 400mg" data-status="ok"><div><div class="med-name">Metronidazole 400mg</div><div class="med-meta"><span>📍 Block B · Shelf 3</span><span>Batch #MZ2024 · Exp: Nov 2026</span></div></div><div class="med-badge stock-ok">37 units</div></div>
+        <div class="med-card" data-name="doxycycline 100mg" data-status="zero"><div><div class="med-name">Doxycycline 100mg</div><div class="med-meta"><span>📍 Block B · Shelf 4</span><span>Batch #DX2024 · Exp: Feb 2026</span></div></div><div class="med-badge stock-zero">Out of Stock</div></div>
+        <span class="section-tag" style="display:block;padding-top:10px;">Diabetes & Hormones</span>
+        <div class="med-card" data-name="metformin 500mg" data-status="low"><div><div class="med-name">Metformin 500mg</div><div class="med-meta"><span>📍 Block D · Shelf 2</span><span>Batch #MT2024 · Exp: Jul 2026</span></div></div><div class="med-badge stock-low">12 units · Low</div></div>
+        <div class="med-card" data-name="insulin rapid" data-status="low"><div><div class="med-name">Insulin (Rapid)</div><div class="med-meta"><span>📍 Block B · Cold Storage</span><span>Batch #IN2024 · Exp: Jun 2025</span></div></div><div class="med-badge stock-low">5 units · Low</div></div>
+        <div class="med-card" data-name="glimepiride 2mg" data-status="ok"><div><div class="med-name">Glimepiride 2mg</div><div class="med-meta"><span>📍 Block D · Shelf 3</span><span>Batch #GL2024 · Exp: May 2026</span></div></div><div class="med-badge stock-ok">60 units</div></div>
+        <div class="med-card" data-name="levothyroxine 50mcg" data-status="ok"><div><div class="med-name">Levothyroxine 50mcg</div><div class="med-meta"><span>📍 Block D · Shelf 4</span><span>Batch #LV2024 · Exp: Oct 2026</span></div></div><div class="med-badge stock-ok">45 units</div></div>
+        <span class="section-tag" style="display:block;padding-top:10px;">Cardiovascular</span>
+        <div class="med-card" data-name="amlodipine 5mg" data-status="ok"><div><div class="med-name">Amlodipine 5mg</div><div class="med-meta"><span>📍 Block C · Shelf 2</span><span>Batch #AML2024 · Exp: Aug 2026</span></div></div><div class="med-badge stock-ok">78 units</div></div>
+        <div class="med-card" data-name="atorvastatin 20mg" data-status="ok"><div><div class="med-name">Atorvastatin 20mg</div><div class="med-meta"><span>📍 Block C · Shelf 3</span><span>Batch #AT2024 · Exp: Dec 2026</span></div></div><div class="med-badge stock-ok">92 units</div></div>
+        <div class="med-card" data-name="enalapril 5mg" data-status="zero"><div><div class="med-name">Enalapril 5mg</div><div class="med-meta"><span>📍 Block C · Shelf 5</span><span>Batch #EN2024 · Exp: Jan 2026</span></div></div><div class="med-badge stock-zero">Out of Stock</div></div>
+        <div class="med-card" data-name="clopidogrel 75mg" data-status="low"><div><div class="med-name">Clopidogrel 75mg</div><div class="med-meta"><span>📍 Block C · Shelf 6</span><span>Batch #CL2024 · Exp: Apr 2026</span></div></div><div class="med-badge stock-low">7 units · Low</div></div>
+        <span class="section-tag" style="display:block;padding-top:10px;">Gastrointestinal</span>
+        <div class="med-card" data-name="omeprazole 20mg" data-status="ok"><div><div class="med-name">Omeprazole 20mg</div><div class="med-meta"><span>📍 Block E · Shelf 1</span><span>Batch #OM2024 · Exp: Nov 2026</span></div></div><div class="med-badge stock-ok">110 units</div></div>
+        <div class="med-card" data-name="pantoprazole 40mg" data-status="ok"><div><div class="med-name">Pantoprazole 40mg</div><div class="med-meta"><span>📍 Block E · Shelf 2</span><span>Batch #PN2024 · Exp: Jun 2027</span></div></div><div class="med-badge stock-ok">74 units</div></div>
+        <div class="med-card" data-name="ondansetron 4mg" data-status="ok"><div><div class="med-name">Ondansetron 4mg</div><div class="med-meta"><span>📍 Block E · Shelf 3</span><span>Batch #ON2024 · Exp: Feb 2027</span></div></div><div class="med-badge stock-ok">30 units</div></div>
+        <span class="section-tag" style="display:block;padding-top:10px;">Respiratory & Allergy</span>
+        <div class="med-card" data-name="cetirizine 10mg" data-status="ok"><div><div class="med-name">Cetirizine 10mg</div><div class="med-meta"><span>📍 Block F · Shelf 1</span><span>Batch #CT2024 · Exp: Jul 2026</span></div></div><div class="med-badge stock-ok">95 units</div></div>
+        <div class="med-card" data-name="montelukast 10mg" data-status="ok"><div><div class="med-name">Montelukast 10mg</div><div class="med-meta"><span>📍 Block F · Shelf 2</span><span>Batch #MN2024 · Exp: Oct 2026</span></div></div><div class="med-badge stock-ok">48 units</div></div>
+        <div class="med-card" data-name="salbutamol 2mg" data-status="zero"><div><div class="med-name">Salbutamol 2mg</div><div class="med-meta"><span>📍 Block F · Shelf 3</span><span>Batch #SB2024 · Exp: May 2026</span></div></div><div class="med-badge stock-zero">Out of Stock</div></div>
+        <span class="section-tag" style="display:block;padding-top:10px;">Vitamins & Supplements</span>
+        <div class="med-card" data-name="vitamin d3" data-status="ok"><div><div class="med-name">Vitamin D3 60,000 IU</div><div class="med-meta"><span>📍 Block G · Shelf 1</span><span>Batch #VD2024 · Exp: Dec 2026</span></div></div><div class="med-badge stock-ok">200 units</div></div>
+        <div class="med-card" data-name="vitamin b12" data-status="ok"><div><div class="med-name">Vitamin B12 500mcg</div><div class="med-meta"><span>📍 Block G · Shelf 2</span><span>Batch #VB2024 · Exp: Aug 2027</span></div></div><div class="med-badge stock-ok">150 units</div></div>
+        <div class="med-card" data-name="calcium carbonate 500mg" data-status="low"><div><div class="med-name">Calcium Carbonate 500mg</div><div class="med-meta"><span>📍 Block G · Shelf 3</span><span>Batch #CA2024 · Exp: Mar 2026</span></div></div><div class="med-badge stock-low">11 units · Low</div></div>
+      </div>
+    </div>
+
+    <!-- Dashboard panel -->
+    <div class="panel" id="dashboardPanel" style="display:none;">
+      <div class="panel-header">
+        <div class="panel-title">Dashboard</div>
+        <div style="font-size:12px;color:var(--text-muted);">April 2026</div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="stat-label">Total Medicines</div><div class="stat-value">28</div></div>
+        <div class="stat-card"><div class="stat-label">In Stock</div><div class="stat-value green">18</div></div>
+        <div class="stat-card"><div class="stat-label">Out of Stock</div><div class="stat-value red">4</div></div>
+        <div class="stat-card"><div class="stat-label">Low Stock</div><div class="stat-value yellow">6</div></div>
+        <div class="stat-card"><div class="stat-label">Total Searches</div><div class="stat-value blue" id="totalSearchesDisplay">0</div></div>
+        <div class="stat-card"><div class="stat-label">Total Units</div><div class="stat-value">1,904</div></div>
+      </div>
+      <div class="panel-title" style="font-size:15px;margin-bottom:12px;">Stock overview</div>
+      <div style="display:flex;flex-direction:column;gap:9px;">
+        <div style="display:flex;align-items:center;gap:12px;"><div style="font-size:13px;color:var(--text-secondary);width:150px;">Paracetamol 500mg</div><div style="flex:1;height:6px;background:var(--bg-tertiary);border-radius:4px;overflow:hidden;"><div style="width:80%;height:100%;background:var(--green);border-radius:4px;"></div></div><div style="font-size:12px;color:var(--text-muted);width:60px;text-align:right;">120 / 150</div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="font-size:13px;color:var(--text-secondary);width:150px;">Vitamin D3</div><div style="flex:1;height:6px;background:var(--bg-tertiary);border-radius:4px;overflow:hidden;"><div style="width:100%;height:100%;background:var(--green);border-radius:4px;"></div></div><div style="font-size:12px;color:var(--text-muted);width:60px;text-align:right;">200 / 200</div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="font-size:13px;color:var(--text-secondary);width:150px;">Metformin 500mg</div><div style="flex:1;height:6px;background:var(--bg-tertiary);border-radius:4px;overflow:hidden;"><div style="width:12%;height:100%;background:var(--yellow);border-radius:4px;"></div></div><div style="font-size:12px;color:var(--text-muted);width:60px;text-align:right;">12 / 100</div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="font-size:13px;color:var(--text-secondary);width:150px;">Insulin (Rapid)</div><div style="flex:1;height:6px;background:var(--bg-tertiary);border-radius:4px;overflow:hidden;"><div style="width:5%;height:100%;background:var(--yellow);border-radius:4px;"></div></div><div style="font-size:12px;color:var(--text-muted);width:60px;text-align:right;">5 / 100</div></div>
+        <div style="display:flex;align-items:center;gap:12px;"><div style="font-size:13px;color:var(--text-secondary);width:150px;">Dolo 650</div><div style="flex:1;height:6px;background:var(--bg-tertiary);border-radius:4px;overflow:hidden;"><div style="width:0%;height:100%;background:var(--red);border-radius:4px;"></div></div><div style="font-size:12px;color:var(--text-muted);width:60px;text-align:right;">0 / 80</div></div>
+      </div>
+    </div>
+
+    <!-- Memory & Insights panel — NEW -->
+    <div class="panel" id="memoryPanel" style="display:none;">
+      <div class="panel-header">
+        <div class="panel-title">Memory & Insights</div>
+        <div style="font-size:12px;color:var(--accent);font-weight:500;">🧠 Powered by Hindsight</div>
+      </div>
+
+      <div style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;line-height:1.6;">
+        The AI agent learns from every query. Medicines searched frequently that are running low are flagged for restock automatically.
+      </div>
+
+      <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:10px;">🔥 Smart Restock Predictions</div>
+      <div id="restockList">
+        <div style="color:var(--text-muted);font-size:13px;">Search for medicines to build predictions. The agent will flag high-demand low-stock items here.</div>
+      </div>
+
+      <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin:20px 0 10px;">📊 Search Frequency This Session</div>
+      <div id="freqList">
+        <div style="color:var(--text-muted);font-size:13px;">No searches yet this session.</div>
+      </div>
+
+      <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin:20px 0 10px;">🧠 This Session's Memory</div>
+      <div id="memoryList">
+        <div style="color:var(--text-muted);font-size:13px;">Queries are retained in Hindsight memory and recalled in future sessions to give you personalised responses.</div>
+      </div>
+    </div>
+
+    <!-- History panel -->
+    <div class="panel" id="historyPanel" style="display:none;">
+      <div class="panel-header">
+        <div class="panel-title">Search History</div>
+        <button onclick="clearHistory()" style="font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:6px;">Clear all</button>
+      </div>
+      <div id="historyList">
+        <div style="color:var(--text-muted);font-size:14px;padding-top:8px;">No history yet. Start searching!</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Input -->
+  <div style="width:100%;flex-shrink:0;">
+    <div class="input-wrapper">
+      <div class="input-box">
+        <div class="input-row">
+          <textarea id="msgInput" rows="1" placeholder="Search medicine or speak..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        </div>
+        <div class="input-actions">
+          <div class="input-left">
+            <button class="icon-btn" title="Voice search" id="micBtn" onclick="startVoice()">
+              <svg id="micIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <span style="font-size:12px;color:var(--text-muted);margin-right:2px;">Enter to send</span>
+            <button class="send-btn" id="sendBtn" onclick="send()" title="Send">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div style="text-align:center;font-size:11.5px;color:var(--text-muted);margin-top:8px;">Hospital AI may make mistakes. Always verify critical medication information.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div id="settingsOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100;align-items:center;justify-content:center;backdrop-filter:blur(2px);" onclick="closeSettingsIfOutside(event)">
+  <div style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:20px;width:520px;max-width:96vw;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,0.4);overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 0;">
+      <div style="font-size:17px;font-weight:600;color:var(--text-primary);">Settings</div>
+      <button onclick="closeSettings()" style="background:var(--bg-tertiary);border:1px solid var(--border);cursor:pointer;width:30px;height:30px;border-radius:50%;color:var(--text-secondary);display:flex;align-items:center;justify-content:center;font-size:17px;">×</button>
+    </div>
+    <div style="overflow-y:auto;flex:1;padding:22px 24px;">
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:12px;">Theme</div>
+      <div style="display:flex;gap:10px;margin-bottom:20px;">
+        <div onclick="setThemeSetting('dark')" id="theme-dark-card" style="flex:1;border-radius:10px;padding:12px;cursor:pointer;border:2px solid var(--accent);background:var(--bg-tertiary);text-align:center;"><div style="font-size:20px;margin-bottom:6px;">🌙</div><div style="font-size:13px;font-weight:500;color:var(--text-primary);">Dark</div></div>
+        <div onclick="setThemeSetting('light')" id="theme-light-card" style="flex:1;border-radius:10px;padding:12px;cursor:pointer;border:2px solid var(--border);background:var(--bg-tertiary);text-align:center;"><div style="font-size:20px;margin-bottom:6px;">☀️</div><div style="font-size:13px;font-weight:500;color:var(--text-primary);">Light</div></div>
+      </div>
+      <div style="font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">About</div>
+      <div style="background:var(--bg-tertiary);border:1px solid var(--border);border-radius:10px;padding:14px 16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;"><span style="font-size:13.5px;color:var(--text-primary);">Version</span><span style="font-size:13px;color:var(--text-secondary);">2.1.0 · Build 2026.04</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--border);"><span style="font-size:13.5px;color:var(--text-primary);">Server status</span><span id="serverStatusBadge" style="font-size:13px;color:var(--text-muted);font-weight:500;">● Checking…</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-top:1px solid var(--border);"><span style="font-size:13.5px;color:var(--text-primary);">Searches this session</span><span id="aboutSearchCount" style="font-size:13px;color:var(--text-secondary);">0</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── STATE ──
+  let searchHistory = [];
+  let totalSearches = 0;
+  let isListening = false;
+  let isDark = true;
+  // Local search frequency mirror for display purposes
+  let localFreq = {};
+  // Current logged-in user ID sent to server for memory scoping
+  const currentUserId = 'user-' + (localStorage.getItem('hospital_user_id') || (() => {
+    const id = Math.random().toString(36).slice(2, 10);
+    localStorage.setItem('hospital_user_id', id);
+    return id;
+  })());
+
+  // ── THEME ──
+  function toggleTheme() {
+    isDark = !isDark;
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    document.getElementById('btn-dark').classList.toggle('active', isDark);
+    document.getElementById('btn-light').classList.toggle('active', !isDark);
+  }
+  function setThemeSetting(mode) {
+    isDark = mode === 'dark';
+    document.documentElement.setAttribute('data-theme', mode);
+    document.getElementById('btn-dark').classList.toggle('active', isDark);
+    document.getElementById('btn-light').classList.toggle('active', !isDark);
+    document.getElementById('theme-dark-card').style.borderColor  = isDark ? 'var(--accent)' : 'var(--border)';
+    document.getElementById('theme-light-card').style.borderColor = !isDark ? 'var(--accent)' : 'var(--border)';
+  }
+
+  // ── VOICE ──
+  function startVoice() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) { alert("Voice not supported. Please open in Google Chrome."); return; }
+    if (isListening) return;
+    const rec = new SR();
+    rec.lang = 'en-IN'; rec.interimResults = false; rec.maxAlternatives = 1;
+    isListening = true;
+    document.getElementById('micBtn').classList.add('listening');
+    rec.start();
+    rec.onresult = e => { document.getElementById('msgInput').value = e.results[0][0].transcript; isListening = false; document.getElementById('micBtn').classList.remove('listening'); send(); };
+    rec.onerror  = () => { isListening = false; document.getElementById('micBtn').classList.remove('listening'); };
+    rec.onend    = () => { isListening = false; document.getElementById('micBtn').classList.remove('listening'); };
+  }
+
+  // ── NAVIGATION ──
+  function setActive(id) { document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+  function hideAll() {
+    ['emptyState','messages','inventoryPanel','dashboardPanel','memoryPanel','historyPanel'].forEach(id => document.getElementById(id).style.display = 'none');
+    document.getElementById('alertBar').style.display = 'none';
+  }
+  function setTopbar(title, badge) {
+    document.getElementById('topbarTitle').textContent = title;
+    const b = document.getElementById('topbarBadge');
+    b.textContent = badge || ''; b.style.display = badge ? '' : 'none';
+  }
+  function newChat() { hideAll(); document.getElementById('messages').innerHTML = ''; document.getElementById('emptyState').style.display = 'flex'; setActive('nav-search'); setTopbar('Search medicines', 'AI Powered'); document.getElementById('msgInput').focus(); }
+  function showSearch() { hideAll(); setActive('nav-search'); setTopbar('Search medicines', 'AI Powered'); const msgs = document.getElementById('messages'); if (msgs.innerHTML.trim() === '') document.getElementById('emptyState').style.display = 'flex'; else msgs.style.display = 'flex'; document.getElementById('msgInput').focus(); }
+  function showInventory() { hideAll(); setActive('nav-inventory'); setTopbar('Inventory', '28 medicines'); document.getElementById('alertBar').style.display = 'flex'; document.getElementById('inventoryPanel').style.display = 'block'; }
+  function showDashboard() { hideAll(); setActive('nav-dashboard'); setTopbar('Dashboard', 'April 2026'); document.getElementById('totalSearchesDisplay').textContent = totalSearches; document.getElementById('dashboardPanel').style.display = 'block'; }
+  function showMemory() { hideAll(); setActive('nav-memory'); setTopbar('Memory & Insights', '🧠 Hindsight'); renderMemoryPanel(); document.getElementById('memoryPanel').style.display = 'block'; }
+  function showHistory() { hideAll(); setActive('nav-history'); setTopbar('History', searchHistory.length + ' searches'); renderHistory(); document.getElementById('historyPanel').style.display = 'block'; }
+
+  // ── MEMORY PANEL RENDER ──
+  function renderMemoryPanel() {
+    // Restock predictions
+    const restockList = document.getElementById('restockList');
+    const restockItems = Object.entries(localFreq)
+      .filter(([, c]) => c >= 2)
+      .sort((a,b) => b[1]-a[1]);
+    if (restockItems.length === 0) {
+      restockList.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">Search medicines a few times to see restock predictions here.</div>';
+    } else {
+      restockList.innerHTML = restockItems.map(([name, count]) =>
+        `<div class="restock-card"><div class="restock-info"><div class="med-name">⚠️ ${escHtml(name)}</div><div class="restock-detail">Searched ${count}× this session — verify stock level</div></div><div class="restock-badge-count">🔁 Restock?</div></div>`
+      ).join('');
+    }
+    // Search frequency
+    const freqList = document.getElementById('freqList');
+    const freqItems = Object.entries(localFreq).sort((a,b) => b[1]-a[1]);
+    if (freqItems.length === 0) {
+      freqList.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">No searches yet this session.</div>';
+    } else {
+      freqList.innerHTML = freqItems.map(([name, count]) =>
+        `<div class="memory-entry" style="display:flex;align-items:center;justify-content:space-between;"><div><div class="memory-query">${escHtml(name)}</div></div><span class="memory-count">${count}× searched</span></div>`
+      ).join('');
+    }
+    // Session memory log
+    const memoryList = document.getElementById('memoryList');
+    if (searchHistory.length === 0) {
+      memoryList.innerHTML = '<div style="color:var(--text-muted);font-size:13px;">Queries are retained in Hindsight memory and recalled in future sessions to give you personalised responses.</div>';
+    } else {
+      memoryList.innerHTML = [...searchHistory].reverse().slice(0, 8).map(item =>
+        `<div class="memory-entry"><div class="memory-query">🔍 ${escHtml(item.query)}</div><div class="memory-time">${item.time} ${item.memoryUsed ? '· <span style="color:var(--accent);">🧠 memory recalled</span>' : ''}</div></div>`
+      ).join('');
+    }
+  }
+
+  // ── INVENTORY FILTER ──
+  function filterInventory(val) {
+    const q = val.toLowerCase();
+    document.querySelectorAll('#invList .med-card').forEach(card => {
+      const matchName = card.dataset.name.includes(q);
+      const activeBtn = document.querySelector('.inv-filter.active-filter');
+      const activeStatus = activeBtn ? activeBtn.dataset.status || 'all' : 'all';
+      const matchStatus = activeStatus === 'all' || card.dataset.status === activeStatus;
+      card.style.display = matchName && matchStatus ? '' : 'none';
+    });
+  }
+  function filterByStatus(status, btn) {
+    document.querySelectorAll('.inv-filter').forEach(b => b.classList.remove('active-filter'));
+    btn.classList.add('active-filter'); btn.dataset.status = status;
+    const q = document.querySelector('.search-input') ? document.querySelector('.search-input').value.toLowerCase() : '';
+    document.querySelectorAll('#invList .med-card').forEach(card => {
+      const matchName = !q || card.dataset.name.includes(q);
+      const matchStatus = status === 'all' || card.dataset.status === status;
+      card.style.display = matchName && matchStatus ? '' : 'none';
+    });
+    document.querySelectorAll('#invList .section-tag').forEach(tag => {
+      const next = tag.nextElementSibling;
+      tag.style.display = (next && next.style.display !== 'none') ? '' : 'none';
+    });
+  }
+
+  // ── HISTORY ──
+  function renderHistory() {
+    const list = document.getElementById('historyList');
+    if (searchHistory.length === 0) { list.innerHTML = '<div style="color:var(--text-muted);font-size:14px;padding-top:8px;">No history yet. Start searching!</div>'; return; }
+    list.innerHTML = [...searchHistory].reverse().map(item => `
+      <div class="history-item">
+        <div><div class="h-query">🔍 ${escHtml(item.query)}</div><div class="h-time">${item.time}${item.memoryUsed ? ' · <span style="color:var(--accent);font-size:11px;">🧠 memory used</span>' : ''}</div></div>
+        <button class="btn-repeat" onclick="searchAgain('${escHtml(item.query)}')">Search again →</button>
+      </div>`).join('');
+  }
+  function clearHistory() { searchHistory = []; localFreq = {}; renderHistory(); }
+  function searchAgain(query) { showSearch(); document.getElementById('msgInput').value = query; send(); }
+  function quickSearch(q) { document.getElementById('msgInput').value = q; send(); }
+  function addRecent(text) {
+    const noRecents = document.getElementById('noRecents');
+    if (noRecents) noRecents.remove();
+    const recents = document.getElementById('recents');
+    const existing = [...recents.querySelectorAll('.recent-item')].find(el => el.dataset.query === text);
+    if (existing) existing.remove();
+    const item = document.createElement('div');
+    item.className = 'recent-item'; item.dataset.query = text;
+    item.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;opacity:0.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>${text.length > 24 ? text.slice(0,24)+'…' : text}`;
+    item.onclick = () => searchAgain(text);
+    recents.prepend(item);
+    const items = recents.querySelectorAll('.recent-item');
+    if (items.length > 8) items[items.length - 1].remove();
+  }
+
+  // ── CHAT UTILS ──
+  function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 160) + 'px'; }
+  function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }
+  function escHtml(str) { return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function copyText(btn, text) { navigator.clipboard.writeText(text).catch(()=>{}); btn.style.color = 'var(--green)'; setTimeout(() => btn.style.color = '', 1500); }
+  function nowTime() { return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+
+  function parseReply(reply, memoryInjected, restockAlerts) {
+    const lines = reply.split('\n').filter(l => l.trim());
+    const firstLine = lines[0] || '';
+    let badgeClass = '';
+    if (firstLine.includes('✅')) badgeClass = 'badge-ok';
+    else if (firstLine.includes('⚠️')) badgeClass = 'badge-warn';
+    else if (firstLine.includes('❌')) badgeClass = 'badge-err';
+
+    let html = '<div class="message-bot">';
+    html += '<div class="bot-label"><div class="bot-label-dot"></div>Result</div>';
+
+    // ── Memory badge (the key new feature) ──
+    if (memoryInjected) {
+      html += '<div style="margin-bottom:10px;"><span class="memory-badge">🧠 Memory active — personalised response</span>';
+      if (restockAlerts && restockAlerts.length > 0) {
+        html += `<span class="restock-badge">🔁 Restock alert: ${escHtml(restockAlerts[0].medicine)}</span>`;
+      }
+      html += '</div>';
+    } else if (restockAlerts && restockAlerts.length > 0) {
+      html += `<div style="margin-bottom:10px;"><span class="restock-badge">🔁 Restock alert: ${escHtml(restockAlerts[0].medicine)}</span></div>`;
+    }
+
+    html += '<div class="result-card">';
+    html += `<div class="result-top"><span class="badge ${badgeClass}">${escHtml(firstLine)}</span></div>`;
+    html += '<div class="result-body">';
+    for (let i = 1; i < lines.length; i++) {
+      if (lines[i].includes('📊') || lines[i].includes('🔥') || lines[i].includes('💡')) break;
+      html += escHtml(lines[i]) + '\n';
+    }
+    html += '</div></div>';
+
+    const noteLines = lines.filter(l => l.includes('📊') || l.includes('🔥') || l.includes('💡'));
+    if (noteLines.length > 0) {
+      html += '<div class="notes-card"><div class="notes-title">Notes</div><ul>';
+      noteLines.forEach(n => { html += `<li>${escHtml(n)}</li>`; });
+      html += '</ul></div>';
+    }
+
+    const replyEsc = reply.replace(/\\/g,'\\\\').replace(/`/g,'\\`');
+    html += `<div class="msg-actions">
+      <button class="action-btn" title="Copy" onclick="copyText(this,\`${replyEsc}\`)">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+    </div>`;
+    html += '</div>';
+    return html;
+  }
+
+  // ── MAIN SEND FUNCTION ──
+  async function send() {
+    const input = document.getElementById('msgInput');
+    const message = input.value.trim();
+    if (!message) return;
+    input.value = ''; input.style.height = 'auto';
+
+    hideAll(); setActive('nav-search'); setTopbar('Search medicines', 'AI Powered');
+    const msgs = document.getElementById('messages');
+    msgs.style.display = 'flex';
+
+    const userWrap = document.createElement('div');
+    const userDiv  = document.createElement('div');
+    userDiv.className = 'message-user';
+    userDiv.textContent = message;
+    userWrap.appendChild(userDiv);
+    msgs.appendChild(userWrap);
+
+    const typingWrap = document.createElement('div');
+    typingWrap.id = 'typingIndicator';
+    typingWrap.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
+    msgs.appendChild(typingWrap);
+    msgs.scrollTop = msgs.scrollHeight;
+    document.getElementById('sendBtn').disabled = true;
+
+    try {
+      // Use relative URL — works on any host (localhost or deployed)
+      const res = await fetch('http://localhost:3000/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, user: currentUserId })
+      });
+      const data = await res.json();
+      typingWrap.remove();
+
+      // Track search frequency locally for memory panel display
+      const key = message.toLowerCase().trim();
+      localFreq[key] = (localFreq[key] || 0) + 1;
+
+      const botWrap = document.createElement('div');
+      botWrap.innerHTML = parseReply(data.reply, data.memoryInjected, data.restockAlerts);
+      msgs.appendChild(botWrap);
+      msgs.scrollTop = msgs.scrollHeight;
+
+      totalSearches++;
+      searchHistory.push({ query: message, time: nowTime(), memoryUsed: data.memoryInjected });
+      addRecent(message);
+
+    } catch (err) {
+      typingWrap.remove();
+      const errDiv = document.createElement('div');
+      errDiv.className = 'message-bot';
+      errDiv.innerHTML = `<div class="result-card" style="border-color:var(--red-bg);">
+        <div style="color:var(--red);font-size:14px;font-weight:500;">⚠️ Server unavailable</div>
+        <div style="color:var(--text-muted);font-size:13px;margin-top:6px;">Make sure the server is running: <code>node server.js</code></div>
+      </div>`;
+      msgs.appendChild(errDiv);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    document.getElementById('sendBtn').disabled = false;
+    input.focus();
+  }
+
+  // ── PROFILE ──
+  function showProfile() { document.getElementById('statSearches').textContent = totalSearches; document.getElementById('profileOverlay').style.display = 'flex'; switchTab('info'); }
+  function closeProfile() { document.getElementById('profileOverlay').style.display = 'none'; }
+  function closeProfileIfOutside(e) { if (e.target === document.getElementById('profileOverlay')) closeProfile(); }
+  function switchTab(tab) {
+    ['info','edit','security'].forEach(t => {
+      document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+      document.getElementById('tab'+t.charAt(0).toUpperCase()+t.slice(1)).style.display = t===tab ? 'block' : 'none';
+    });
+  }
+  function saveProfile() {
+    const name = document.getElementById('editName').value.trim() || 'Dinesh Varma';
+    const role = document.getElementById('editRole').value;
+    const email = document.getElementById('editEmail').value.trim();
+    const initials = name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    document.getElementById('profileAvatarLarge').textContent = initials;
+    document.getElementById('sidebarAvatar').textContent = initials;
+    document.getElementById('profileDisplayName').textContent = name;
+    document.getElementById('profileRoleBadge').textContent = role;
+    document.getElementById('sidebarName').textContent = name;
+    document.getElementById('sidebarRole').textContent = role;
+    document.getElementById('infoName').textContent = name;
+    document.getElementById('infoRole').textContent = role;
+    document.getElementById('infoEmail').textContent = email;
+    switchTab('info');
+  }
+
+  // ── SETTINGS ──
+  function showSettings() { document.getElementById('aboutSearchCount').textContent = totalSearches; document.getElementById('settingsOverlay').style.display = 'flex'; checkServerStatus(); }
+  function closeSettings() { document.getElementById('settingsOverlay').style.display = 'none'; }
+  function closeSettingsIfOutside(e) { if (e.target === document.getElementById('settingsOverlay')) closeSettings(); }
+
+  async function checkServerStatus() {
+    const badge = document.getElementById('serverStatusBadge');
+    try {
+      const r = await fetch('http://localhost:3000/health');
+      if (r.ok) {
+        const d = await r.json();
+        badge.textContent = '● Online';
+        badge.style.color = 'var(--green)';
+      } else {
+        badge.textContent = '● Error'; badge.style.color = 'var(--red)';
+      }
+    } catch {
+      badge.textContent = '● Offline'; badge.style.color = 'var(--yellow)';
+    }
+  }
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeProfile(); closeSettings(); } });
+</script>
+</body>
+</html>
