@@ -17,23 +17,34 @@ AI-powered medicine search and pharmacy management system for hospital staff. Bu
 - **Memory**: Hindsight for persistent per-user memory (retain + recall)
 - **Frontend**: Vanilla HTML/CSS/JS — no build step
 
+  ✨ Features
+
+💬 Natural language chat — query medicine stock in plain English
+🧠 Persistent memory — remembers past interactions per user via Hindsight
+💊 Full inventory access — stock status, location, category, and availability
+⚡ Fast responses — powered by Groq's ultra-low-latency LLM inference
+🌐 REST API — simple endpoints to integrate with existing hospital systems
+
+
+🔮 Future Scope
+
+Expand beyond inventory to support appointment booking, patient triage, and ward management
+Scale to multi-hospital networks with role-based access for doctors, nurses, and admins
+
+
 ## Setup
 
 ```bash
 # 1. Clone and install
 npm install
 
-# 2. Configure environment
-cp .env.example .env
-# Edit .env and add your GROQ_API_KEY and HINDSIGHT_API_KEY
-
-# 3. Add your medicine inventory
+# 2. Add your medicine inventory
 # Edit medicines.json with your hospital's stock data
 
-# 4. Run
+# 3. Run
 node server.js
 
-# 5. Open in browser
+# 4. Open in browser
 # http://localhost:3000
 ```
 
@@ -73,6 +84,17 @@ node server.js
 | `HINDSIGHT_BANK_ID` | No | Memory bank name (default: hospital-ai) |
 | `PORT` | No | Server port (default: 3000) |
 
+
+🧠 How the Memory Works
+
+Before responding — Hindsight searches past conversations for relevant context (recall)
+The LLM generates a response using the current query + inventory + recalled memory
+After responding — the conversation is saved back to Hindsight (retain) for future recall
+
+Each user has isolated memory, so staff members get personalized context without overlap.
+
+
+
 ## Architecture
 
 ```
@@ -85,4 +107,9 @@ Browser → Express Server → Rate Limiter
                             5. Groq LLM
                             6. Hindsight retain (async)
                             7. Return reply + memory/restock metadata
+
+
+👥 Team Kali
+
+Built with ❤️ at Hack with Chennai
 ```
