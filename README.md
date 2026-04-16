@@ -1,115 +1,117 @@
-# Hospital AI 💊
+🏥 Hospital AI 💊
 
-AI-powered medicine search and pharmacy management system for hospital staff. Built for **Hack With Chennai 2026**.
+AI-Powered Medicine Search & Smart Inventory System
 
-## What it does
+Built for Hack With Chennai 2026 by Team Kali
 
-- **Instant medicine search** — Ask in natural language: "Do we have insulin?" or "Where is amoxicillin?"
-- **Hindsight Memory** — The agent remembers past queries per staff member and surfaces patterns over time
-- **Smart Restock Prediction** — Detects medicines queried frequently that are low on stock and proactively alerts staff
-- **Inventory dashboard** — Full stock overview with low/out-of-stock filters
-- **Offline fallback** — Works without API keys using keyword matching
+📌 Problem Statement
 
-## Stack
+Hospital staff often struggle to quickly find medicine availability, location, and stock levels — especially in emergency situations. Traditional systems are slow, manual, and lack intelligence.
 
-- **Backend**: Node.js + Express
-- **LLM**: Groq (LLaMA-3.3-70B) for fast inference
-- **Memory**: Hindsight for persistent per-user memory (retain + recall)
-- **Frontend**: Vanilla HTML/CSS/JS — no build step
+💡 Solution
 
-  ✨ Features
+Hospital AI is an intelligent assistant that allows staff to query medicine inventory using natural language and get instant, context-aware responses.
 
-💬 Natural language chat — query medicine stock in plain English
-🧠 Persistent memory — remembers past interactions per user via Hindsight
-💊 Full inventory access — stock status, location, category, and availability
-⚡ Fast responses — powered by Groq's ultra-low-latency LLM inference
-🌐 REST API — simple endpoints to integrate with existing hospital systems
+It not only answers queries but also learns from usage patterns and predicts restocking needs.
+
+✨ Key Features
+
+💬 Natural Language Search
+
+Ask like a human:
+"Do we have insulin?" or "Where is paracetamol?"
+
+🧠 Smart Memory (Hindsight AI)
+
+Remembers past queries per user and improves responses over time
+
+📊 Smart Restock Prediction
+
+Detects frequently searched low-stock medicines and alerts staff
+
+💊 Inventory Dashboard
+
+View complete stock with filters (low/out-of-stock)
+
+⚡ Fast AI Responses
+
+Powered by Groq’s ultra-low latency LLM
+
+🌐 REST API Ready
+
+Easily integrates with hospital systems
+
+🔌 Offline Mode
+
+Works even without API keys using keyword matching
 
 
-🔮 Future Scope
-
-Expand beyond inventory to support appointment booking, patient triage, and ward management
-Scale to multi-hospital networks with role-based access for doctors, nurses, and admins
+🛠️ Tech Stack
 
 
-## Setup
+| Layer    | Technology            |
+| -------- | --------------------- |
+| Backend  | Node.js, Express      |
+| AI Model | Groq (LLaMA 3.3 70B)  |
+| Memory   | Hindsight AI          |
+| Frontend | HTML, CSS, JavaScript |
 
-```bash
-# 1. Clone and install
+
+
+🧠 How It Works
+
+User sends a query
+
+System checks medicine inventory
+
+Hindsight retrieves past interactions (memory)
+
+AI generates a contextual response
+
+System tracks frequency for restock prediction
+
+Response is returned and stored for future learning
+
+
+🏗️ Architecture
+
+
+Browser → Express Server → Rate Limiter
+
+                        → /chat endpoint
+                            ├── Input Validation
+                            ├── Search Tracking
+                            ├── Memory Recall (Hindsight)                            
+                            ├── AI Processing (Groq)                            
+                            ├── Memory Storage         
+                            └── Response վերադարձ
+
+
+
+⚙️ Installation Guide 
+
+# 1. Install dependencies
 npm install
 
-# 2. Add your medicine inventory
-# Edit medicines.json with your hospital's stock data
-
-# 3. Run
+# 2. Run server
 node server.js
 
-# 4. Open in browser
-# http://localhost:3000
-```
-
-## API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| POST | `/chat` | Main AI chat endpoint |
-| GET | `/medicines` | List/filter medicines |
-| GET | `/insights` | Search frequency & restock predictions |
-| GET | `/health` | System health check |
-
-### POST /chat
-
-**Body:**
-```json
-{ "message": "Do we have insulin?", "user": "nurse-priya" }
-```
-
-**Response:**
-```json
-{
-  "reply": "⚠️ Insulin (Rapid) is LOW on stock...",
-  "usedAI": true,
-  "memoryInjected": true,
-  "restockAlerts": [...],
-  "timestamp": "2026-04-13T10:00:00.000Z"
-}
-```
-
-## Environment Variables
-
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `GROQ_API_KEY` | Yes (for AI) | Groq API key |
-| `HINDSIGHT_API_KEY` | Yes (for memory) | Hindsight API key |
-| `HINDSIGHT_BANK_ID` | No | Memory bank name (default: hospital-ai) |
-| `PORT` | No | Server port (default: 3000) |
+# 3. Open browser
+http://localhost:3000
 
 
-🧠 How the Memory Works
+🔌 API Endpoints
 
-Before responding — Hindsight searches past conversations for relevant context (recall)
-The LLM generates a response using the current query + inventory + recalled memory
-After responding — the conversation is saved back to Hindsight (retain) for future recall
-
-Each user has isolated memory, so staff members get personalized context without overlap.
-
-
-
-## Architecture
-
-```
-Browser → Express Server → Rate Limiter
-                        → POST /chat:
-                            1. Validate input
-                            2. Record search frequency
-                            3. Hindsight recall (memory)
-                            4. Build system prompt (inventory + memory + restock alerts)
-                            5. Groq LLM
-                            6. Hindsight retain (async)
-                            7. Return reply + memory/restock metadata
+| Method | Endpoint   | Description         |
+| ------ | ---------- | ------------------- |
+| POST   | /chat      | AI query system     |
+| GET    | /medicines | View inventory      |
+| GET    | /insights  | Restock predictions |
+| GET    | /health    | Server status       |
 
 
 👥 Team Kali
 
-Built with ❤️ at Hack with Chennai
-```
+Built with dedication at Hack With Chennai 2026
+
+
